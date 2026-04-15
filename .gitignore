@@ -1,0 +1,15 @@
+# Personal data — never commit
+references/user-profile.md
+references/*_catalog.json
+references/*_playlists.json
+references/.backup-path
+
+# macOS noise
+.DS_Store
+**/.DS_Store
+
+# Editor cruft
+*.swp
+*~
+.vscode/
+.idea/
