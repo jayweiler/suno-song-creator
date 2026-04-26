@@ -170,9 +170,10 @@ anything else:
    - The path stored in `references/.backup-path` (a one-line text file with an absolute path,
      gitignored)
 3. **If a backup is resolved, restore from it.** Copy `<backup>/user-profile.md` to
-   `references/user-profile.md` and any `<backup>/*_catalog.json` and `<backup>/*_playlists.json`
-   files to `references/`. Tell the user: "Restored your personal profile from backup at [PATH]."
-   Then proceed normally.
+   `references/user-profile.md`, `<backup>/inspiration-library.md` to
+   `references/inspiration-library.md` (if present), and any `<backup>/*_catalog.json` and
+   `<backup>/*_playlists.json` files to `references/`. Tell the user: "Restored your personal
+   profile from backup at [PATH]." Then proceed normally.
 4. **If no backup is resolved, ask the user once** before falling back to the template:
 
    > "I don't see a personal profile yet. Before we start, would you like to set up a backup
@@ -192,7 +193,8 @@ anything else:
    template. As we work together, I'll build it up with your style preferences, recurring
    themes, and song catalog."
 
-The same gitignore + restore logic protects `references/*_catalog.json` files.
+The same gitignore + restore logic protects `references/*_catalog.json` files and
+`references/inspiration-library.md` (see the Inspiration Library section below).
 
 ### Personal-Data Backup (Recommended)
 
@@ -304,6 +306,52 @@ When updating the profile, capture:
 
 See `references/user-profile-template.md` for the profile format.
 
+## Inspiration Library
+
+The inspiration library is a personal collection of excerpts — song lyrics, poetry,
+prose, anywhere else — that resonate with the user. It exists to calibrate the skill's
+stylistic and thematic instincts when drafting. The point isn't to imitate or quote
+these directly; it's to give the skill a sense of the *moves, registers, and emotional
+textures* that land for this person.
+
+The personal file lives at `references/inspiration-library.md`. It is **gitignored**
+and follows the same bootstrap + backup logic as the user profile (see First-Run
+Bootstrap above): restored from backup if present, otherwise seeded from
+`references/inspiration-library-template.md`. When backing up personal data, include
+this file alongside the profile and catalog.
+
+### How to use the library during a session
+
+At session start, after reading the user profile, also read
+`references/inspiration-library.md` if it exists. Treat the contents as **ambient
+calibration for early drafting**, not as a quote bank or a menu of techniques to
+suggest. Specifically:
+
+- Let the entries shape the *register* of your first drafts — if the library is
+  saturated with plain-spoken second-person lyrics, lean that way unprompted; if it
+  leans poetic and dense with metaphor, start there.
+- Let the `What resonates` notes inform the *moves* you reach for — turns,
+  understatement, domestic detail, religious imagery, whatever recurs.
+- **Don't quote, paraphrase, or directly imitate** entries in drafts. The library
+  trains taste; it isn't source material.
+- **Don't proactively reference the library** mid-session ("this reminds me of your
+  Springsteen entry…"). Keep the influence implicit unless the user explicitly asks
+  you to pull from it.
+- If the user asks you to "pull from my library" or "channel something I've saved,"
+  *then* surface relevant entries by tag or theme and discuss them openly.
+
+### Capturing new entries
+
+When a user shares a lyric, line, or excerpt that clearly resonates with them — either
+mid-session ("god I love that line from…") or as a deliberate add ("save this one") —
+offer to add it to the library. Capture in the format defined by the template:
+source, type, excerpt, what resonates, tags, date. Press lightly for a *specific*
+`What resonates` note; "good imagery" doesn't help future calibration. Something like
+"the way the second line undercuts the sincerity of the first" does.
+
+After adding entries, copy `references/inspiration-library.md` to the backup location
+along with the profile.
+
 ## Writing Craft Notes
 
 These patterns consistently produce stronger songs:
@@ -344,3 +392,11 @@ Make the listener feel seen, not observed.
 
 - `references/user-profile.md` — (Created per-user) The actual profile storing this person's
   preferences, themes, and style patterns.
+
+- `references/inspiration-library-template.md` — Template for the personal collection of
+  resonant excerpts (lyrics, poems, prose). Used to seed a fresh library on first run.
+
+- `references/inspiration-library.md` — (Created per-user) The actual library of excerpts
+  that resonate with this person, with notes on what about each one lands. Read at session
+  start as ambient calibration for stylistic and thematic instincts. See the Inspiration
+  Library section above.
