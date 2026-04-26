@@ -157,60 +157,84 @@ Variations:
 This skill adapts to each person's creative tendencies over time. Preferences are stored in a
 user profile file that builds up across sessions.
 
-### First-Run Bootstrap (with Auto-Restore)
+### Personal Data Lives in the Backup Directory
 
-The personal `references/user-profile.md` file is **gitignored** — it never ships with the skill
-and is never overwritten by reinstalls. On every session start, run this check before doing
+Personal data files (`user-profile.md`, `inspiration-library.md`, `notebook.md`,
+`touchstones.md`, `*_catalog.json`, `*_playlists.json`) are **NOT stored in the install
+location**. They live in a single backup directory that the user owns. The skill reads
+and writes those files directly from that directory at runtime. The install's
+`references/` folder contains only public templates and reference docs.
+
+This design means: edits made in any session are immediately visible to every future
+session, with zero copy steps. Reinstalls don't reset personal data. There is one
+source of truth.
+
+### Resolving the Backup Path
+
+On every session start, before reading any personal data, resolve the backup path in
+this order — take the first that resolves to a real directory:
+
+1. `$SUNO_SKILL_BACKUP_DIR` environment variable (recommended — survives reinstalls)
+2. The path stored in `references/.backup-path` (a one-line text file with an absolute
+   path; gitignored, gets wiped on reinstall, must be re-dropped)
+
+Once resolved, treat the backup path as `<backup>` for the rest of this document. All
+personal data reads and writes use `<backup>/<filename>`.
+
+### First-Run Setup
+
+If neither resolution method finds a backup directory, ask the user once before doing
 anything else:
 
-1. **Check whether `references/user-profile.md` exists.** If yes, read it and proceed normally.
-2. **If it doesn't exist, resolve a backup location** (in this order, take the first that
-   resolves to a real directory containing a `user-profile.md`):
-   - `$SUNO_SKILL_BACKUP_DIR` environment variable
-   - The path stored in `references/.backup-path` (a one-line text file with an absolute path,
-     gitignored)
-3. **If a backup is resolved, restore from it.** Copy `<backup>/user-profile.md` to
-   `references/user-profile.md`, `<backup>/inspiration-library.md` to
-   `references/inspiration-library.md` (if present), and any `<backup>/*_catalog.json` and
-   `<backup>/*_playlists.json` files to `references/`. Tell the user: "Restored your personal
-   profile from backup at [PATH]." Then proceed normally.
-4. **If no backup is resolved, ask the user once** before falling back to the template:
+> "I don't see a personal-data location yet. Where would you like your profile,
+> inspiration library, notebook, touchstones, and song catalog to live? Picking a
+> location once means future skill reinstalls preserve everything.
+>
+> A: Use `~/.suno-song-creator-data/` (generic default)
+> B: Custom path — tell me where
+> C: Skip for this session — work from templates only, nothing persists"
 
-   > "I don't see a personal profile yet. Before we start, would you like to set up a backup
-   > location so your profile and song catalog survive future skill reinstalls?
-   >
-   > A: Yes, use `~/.suno-song-creator-backup/` (recommended generic default)
-   > B: Yes, custom path — tell me where
-   > C: Skip — bootstrap from template, no backup. (You can set this up later by writing the
-   >    path to `references/.backup-path` or setting `$SUNO_SKILL_BACKUP_DIR`.)"
+For A or B: create the directory if needed. Set the path via `$SUNO_SKILL_BACKUP_DIR`
+(suggest the user add it to their shell config) AND write `references/.backup-path` as
+a fallback. Then continue with the seeding step.
 
-   If the user chooses A or B: create the backup directory if needed, write the absolute path
-   to `references/.backup-path`, then check whether the backup already contains a profile — if
-   yes, restore from it; if empty, fall through to template (step 5) and immediately back up
-   the new profile to the chosen location.
-5. **Fall back to the template.** Copy `references/user-profile-template.md` →
-   `references/user-profile.md`. Tell the user: "I've created a fresh profile from the
-   template. As we work together, I'll build it up with your style preferences, recurring
-   themes, and song catalog."
+For C: read templates only; warn the user that this session's additions won't persist.
 
-The same gitignore + restore logic protects `references/*_catalog.json` files and
-`references/inspiration-library.md` (see the Inspiration Library section below).
+### Seeding Missing Files
 
-### Personal-Data Backup (Recommended)
+After the backup path is resolved, for each personal-data file, check whether
+`<backup>/<filename>` exists:
 
-Once the user has a backup location configured, **after any meaningful update to the profile or
-catalog, copy the files to the backup location.** Either remind the user manually, or — if a
-helper script like `sync-suno-personal.sh` is present in their environment — invoke or suggest
-running it. Without a backup, a skill reinstall (Cowork or otherwise) will reset the profile to
-the template and lose accumulated context.
+- If yes, do nothing — the file is already authoritative.
+- If no, seed it by copying the corresponding template:
+  - `<backup>/user-profile.md` ← `references/user-profile-template.md`
+  - `<backup>/inspiration-library.md` ← `references/inspiration-library-template.md`
+  - `<backup>/notebook.md` ← `references/notebook-template.md`
+  - `<backup>/touchstones.md` ← `references/touchstones-template.md`
 
-If a user mentions losing their profile, moving machines, or seeing the "fresh from template"
-message unexpectedly, check whether `references/.backup-path` is set and whether the backup
-location actually contains files. Offer to restore manually if auto-restore didn't fire.
+Catalog and playlist JSON files (`*_catalog.json`, `*_playlists.json`) have no
+templates and are simply absent until the user runs a Suno catalog refresh.
+
+After seeding, tell the user: "I've seeded fresh personal-data files at [PATH]. As we
+work together, I'll build them up with your style preferences, recurring themes, song
+catalog, library entries, notebook seeds, and touchstones."
+
+### Reading and Writing Personal Data
+
+All personal-data reads and writes use `<backup>/<filename>` directly. Never copy
+personal data into the install location. Never edit a local copy. The install's
+`references/` folder contains only public templates and reference docs; those are
+read-only at runtime.
+
+If a user mentions losing data, moving machines, or seeing the "seeded fresh" message
+unexpectedly, the backup path resolution failed. Check whether
+`$SUNO_SKILL_BACKUP_DIR` is set and whether `references/.backup-path` contains a real
+absolute path. Offer to re-set the path; their data is safe in whichever directory
+they originally chose.
 
 ### How Preferences Work
 
-Check for an existing user profile at `references/user-profile.md` before each session. If one
+Check for an existing user profile at `<backup>/user-profile.md` before each session. If one
 exists, read it to understand the person's:
 - Preferred genres, artists, and style references
 - Recurring themes and subjects (family, introspection, humor, resilience)
@@ -243,20 +267,20 @@ treat both as potentially stale. Before writing anything new:
    quick so the user can choose to skip.
 
 4. If the user picks A: pull current public catalog from `https://suno.com/@<handle>`. Compare
-   against `references/<handle>_songs_catalog.json`. Only fetch full lyrics for songs that are new
+   against `<backup>/<handle>_songs_catalog.json`. Only fetch full lyrics for songs that are new
    since the last sync, unless asked to re-pull everything.
 
 5. If the user picks B: do A *and* pull all 7+ playlists from `https://suno.com/me/playlists`.
    For each playlist, capture: name, song IDs, and full data (lyrics + style + plays/likes) for
    any song not already in the catalog. Track which songs are in which playlists. Save to
-   `references/<handle>_playlists.json`.
+   `<backup>/<handle>_playlists.json`.
 
 6. After any pull, summarize what's new (titles, playlists they belong to, public vs private)
    and ask whether to update the profile before continuing to the songwriting jam.
 
-7. Save updated data to:
-   - `references/<handle>_songs_catalog.json` (public catalog)
-   - `references/<handle>_playlists.json` (playlists + unpublished)
+7. Save updated data directly to the backup directory:
+   - `<backup>/<handle>_songs_catalog.json` (public catalog)
+   - `<backup>/<handle>_playlists.json` (playlists + unpublished)
 
    Update the "Songs Created" table and "Playlist Groupings" section in `user-profile.md` with
    the new entries. Update the sync date at the top of the profile.
@@ -293,7 +317,7 @@ Suno's profile pages are client-rendered SPAs. Scraping approach that works:
 5. Download the collected JSON via a temporary blob URL + anchor-click; read it from the user's
    Downloads folder (request access if not mounted).
 
-See `references/<handle>_songs_catalog.json` for an example of the resulting data structure.
+The resulting JSON structure is documented per-user in `<backup>/<handle>_songs_catalog.json`.
 
 ### Creating/Updating the Profile
 
@@ -314,16 +338,15 @@ stylistic and thematic instincts when drafting. The point isn't to imitate or qu
 these directly; it's to give the skill a sense of the *moves, registers, and emotional
 textures* that land for this person.
 
-The personal file lives at `references/inspiration-library.md`. It is **gitignored**
-and follows the same bootstrap + backup logic as the user profile (see First-Run
-Bootstrap above): restored from backup if present, otherwise seeded from
-`references/inspiration-library-template.md`. When backing up personal data, include
-this file alongside the profile and catalog.
+The personal file lives at `<backup>/inspiration-library.md` (where `<backup>` is the
+backup directory resolved at session start — see Resolving the Backup Path above). The
+skill reads and writes this file directly from the backup location; nothing lives in
+the install. Seeded from `references/inspiration-library-template.md` if absent.
 
 ### How to use the library during a session
 
 At session start, after reading the user profile, also read
-`references/inspiration-library.md` if it exists. Treat the contents as **ambient
+`<backup>/inspiration-library.md` if it exists. Treat the contents as **ambient
 calibration for early drafting**, not as a quote bank or a menu of techniques to
 suggest. Specifically:
 
@@ -349,8 +372,100 @@ source, type, excerpt, what resonates, tags, date. Press lightly for a *specific
 `What resonates` note; "good imagery" doesn't help future calibration. Something like
 "the way the second line undercuts the sincerity of the first" does.
 
-After adding entries, copy `references/inspiration-library.md` to the backup location
-along with the profile.
+Entries are written directly to `<backup>/inspiration-library.md` — no copy step.
+
+### Cross-linking with Touchstones
+
+When a user adds an inspiration-library entry whose source song is *also* a Touchstones
+entry (see below) — or adds a Touchstones entry for a song that already has lines in the
+inspiration library — offer to cross-link them. Use the optional `Source touchstone:`
+field on the library entry and the optional `Linked library entries:` field on the
+touchstone. Both fields are plain text — list the entry titles, not file paths. The
+skill can build a cross-reference index at session start by reading both files.
+
+When proposing a cross-link, name both entries explicitly so the user can confirm: "You
+also have a touchstone for this song — link this excerpt to it?"
+
+## Notebook
+
+The notebook is the user's songwriter's-notebook layer — concrete, in-progress ideas
+they want to write but haven't yet. These differ from the inspiration library (which
+holds others' work as calibration) and from Touchstones (which hold others' songs as
+whole-shape references). Notebook entries are **the user's own seeds**: scenes,
+titles, characters, palettes, structural experiments, observations.
+
+The personal file lives at `<backup>/notebook.md` (where `<backup>` is the backup
+directory resolved at session start). Read and written directly from backup; nothing
+lives in the install. Seeded from `references/notebook-template.md` if absent.
+
+### How to use the notebook during a session
+
+At session start, after reading the user profile and inspiration library, also read
+`<backup>/notebook.md` if it exists. Unlike the library (always-on ambient
+calibration), the notebook is **read-and-hold**:
+
+- Don't proactively suggest seeds at the start of every session — wait for the user to
+  ask "what should I work on?", "got any ideas?", or to describe a feeling/topic that
+  maps to an open seed.
+- When a session's direction matches an open seed, surface it openly: "You've got an
+  open seed about *the year of silent Mondays* — does this conversation belong there?"
+- When the user accepts a seed and a song emerges from it, mark the seed `Status:
+  spawned` and fill in `Spawned: [Song Title]`. Add the song to `Songs Created` in the
+  user profile.
+- Don't auto-park stale seeds. Only the user decides when something gets parked.
+
+### Capturing new entries
+
+When the user says something like "I want to write a song about…", "remind me to do
+something with…", "there's a song in…", or "title that won't leave me alone:…" — offer
+to capture it as a notebook entry. Press for *specificity*: the more concrete the seed,
+the more useful it is later. A vague seed ("something about my dad") is worth less than
+a specific one ("a song built around the cassette tape Dad left in the car for six
+years"). If the user gestures at a touchstone or library entry that's steering the
+seed, capture that link in the `Linked touchstone` field.
+
+Entries are written directly to `<backup>/notebook.md` — no copy step.
+
+## Touchstones
+
+Touchstones are complete songs by other artists that the user returns to as
+**whole-shape reference works**. They differ from inspiration library entries (which
+quote a specific line) and from artist references in the user profile (which are
+artist-level shorthand). A touchstone says: "this whole song nails a feeling, a
+concept, or a structural move I want to be able to channel." If the user finds
+themselves wanting to quote a single line from a touchstone, that line probably also
+belongs in the inspiration library — cross-link them.
+
+The personal file lives at `<backup>/touchstones.md` (where `<backup>` is the backup
+directory resolved at session start). Read and written directly from backup; nothing
+lives in the install. Seeded from `references/touchstones-template.md` if absent.
+
+### How to use touchstones during a session
+
+At session start, after reading the user profile, library, and notebook, also read
+`<backup>/touchstones.md` if it exists. Touchstones sit between the library
+(ambient) and the notebook (on-request) in terms of how proactively to use them:
+
+- When the user describes a feeling or topic that matches a touchstone's `What it
+  captures`, name the touchstone openly as a directional reference: "this is in the
+  territory of one of your touchstones — want me to lean toward that whole-song
+  shape?" (Use the touchstone's actual entry title when you say it to the user.)
+- Do not quote, paraphrase, or directly imitate the touchstone song. Touchstones
+  calibrate macro-craft (arc, structural move, conceptual posture); they aren't source
+  material.
+- If a touchstone has linked library entries, the user may want both surfaced together
+  when the touchstone comes up.
+
+### Capturing new entries
+
+When the user says "this whole song captures…", "I want to write something with the
+shape of…", "[Song] is doing exactly what I want to do with…", or similar — offer to
+add it as a touchstone. Press for a precise `What it captures`: "captures a feeling"
+isn't useful; "captures the texture of holding two contradictory truths at once
+without resolving them" is. After capture, ask if any specific lines from the song
+should also live in the inspiration library, and cross-link if yes.
+
+Entries are written directly to `<backup>/touchstones.md` — no copy step.
 
 ## Writing Craft Notes
 
@@ -390,13 +505,28 @@ Make the listener feel seen, not observed.
 - `references/user-profile-template.md` — Template for storing user preferences and creative
   tendencies. Used to personalize sessions over time.
 
-- `references/user-profile.md` — (Created per-user) The actual profile storing this person's
-  preferences, themes, and style patterns.
+- `<backup>/user-profile.md` — (Per-user, lives in the backup directory) The actual profile
+  storing this person's preferences, themes, and style patterns. See Personal Data Lives
+  in the Backup Directory above.
 
 - `references/inspiration-library-template.md` — Template for the personal collection of
   resonant excerpts (lyrics, poems, prose). Used to seed a fresh library on first run.
 
-- `references/inspiration-library.md` — (Created per-user) The actual library of excerpts
-  that resonate with this person, with notes on what about each one lands. Read at session
-  start as ambient calibration for stylistic and thematic instincts. See the Inspiration
-  Library section above.
+- `<backup>/inspiration-library.md` — (Per-user) Library of excerpts that resonate with
+  this person, with notes on what about each one lands. Read at session start as ambient
+  calibration. See the Inspiration Library section above.
+
+- `references/notebook-template.md` — Template for the user's songwriter's-notebook of
+  in-progress seeds (scenes, titles, characters, palettes, structural experiments).
+
+- `<backup>/notebook.md` — (Per-user) The user's own seeds for songs they want to write
+  but haven't yet. Read at session start; surfaced when the user asks for direction or
+  describes a feeling that matches an open seed. See the Notebook section above.
+
+- `references/touchstones-template.md` — Template for whole-song reference works by other
+  artists that calibrate macro-craft.
+
+- `<backup>/touchstones.md` — (Per-user) Complete songs the user returns to as whole-shape
+  directional references. Read at session start; surfaced when a session's feeling or
+  topic matches a touchstone's `What it captures`. Cross-links with inspiration-library
+  entries when both apply. See the Touchstones section above.
