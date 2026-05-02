@@ -1,16 +1,21 @@
 # Suno Song Creator
 
-A Claude skill that turns the model into a co-writing partner for [Suno](https://suno.com).
-You bring a feeling, a phrase, a person, a half-formed idea — Claude meets you where
-you are and helps shape it into a complete package: lyrics with Suno section tags, a
-style prompt tuned to the song's mood, arrangement notes, and a few variation hooks
-you can swap in. The session is meant to feel like a jam, not an interview.
+An agent skill that turns your AI assistant into a co-writing partner for
+[Suno](https://suno.com). Uses the cross-platform `SKILL.md` format, so it works
+in Claude Code, ChatGPT (Skills), Codex CLI, Gemini CLI, and other agents that
+implement the standard.
+
+You bring a feeling, a phrase, a person, a half-formed idea — the assistant meets
+you where you are and helps shape it into a complete package: lyrics with Suno
+section tags, a style prompt tuned to the song's mood, arrangement notes, and a
+few variation hooks you can swap in. The session is meant to feel like a jam,
+not an interview.
 
 ## What it does
 
-- **Co-creative jam sessions.** Claude doesn't fire off a questionnaire. It reflects
-  back what you've shared, throws out a few draft lines or a possible angle, and
-  builds with you from there.
+- **Co-creative jam sessions.** The assistant doesn't fire off a questionnaire.
+  It reflects back what you've shared, throws out a few draft lines or a possible
+  angle, and builds with you from there.
 - **Real Suno output.** When the song clicks, you get lyrics formatted with Suno
   section tags (`[Verse]`, `[Pre-Chorus]`, `[Chorus]`, `[Bridge]`, `[Outro]`, etc.),
   a descriptive style prompt, an arrangement sketch, and optional variations
@@ -29,8 +34,10 @@ you can swap in. The session is meant to feel like a jam, not an interview.
     whole-shape reference works.
 - **Suno catalog sync.** If you give the skill your Suno handle, it can pull your
   published catalog (and optionally your playlists, including unpublished songs)
-  via the Chrome extension, so future sessions know what you've already written
-  and don't re-suggest territory you've covered.
+  so future sessions know what you've already written and don't re-suggest
+  territory you've covered. (Currently implemented for Claude via the Claude-in-
+  Chrome extension; see [Compatibility](#compatibility) for what other agents
+  need to fall back on.)
 - **Per-model prompt tuning.** Suno's models behave differently — v4.5 rewards
   comma-tag prompts; v5 and v5.5 reward narrative prose; v5.5 polishes
   aesthetics that v5 keeps raw. Pick a default model in your profile and the
@@ -39,8 +46,9 @@ you can swap in. The session is meant to feel like a jam, not an interview.
 
 ## Install
 
-This skill follows the standard Claude skill layout — a directory with a `SKILL.md`
-at the root.
+This skill uses the cross-platform Agent Skills format — a directory with a
+`SKILL.md` at the root plus a `references/` folder. Most modern AI agents read
+this format; the install path is what differs between them.
 
 ### Quick install (recommended)
 
@@ -48,7 +56,7 @@ Download the latest release zip:
 
 [**suno-song-creator.zip**](https://github.com/jayweiler/suno-song-creator/releases/latest/download/suno-song-creator.zip)
 
-Then, depending on where you run Claude:
+Then unzip into the skills directory for your agent:
 
 **Claude Code / Claude Agent SDK:**
 
@@ -56,16 +64,36 @@ Then, depending on where you run Claude:
 unzip suno-song-creator.zip -d ~/.claude/skills/
 ```
 
-Restart Claude Code (or your agent) so the skill loader picks it up.
+**Codex CLI** (project-scoped):
 
-**Cowork:**
+```bash
+unzip suno-song-creator.zip -d .codex/skills/
+```
 
-Rename the file from `.zip` to `.skill`, then attach it in a Cowork session —
-Claude will offer to install it.
+**Gemini CLI:**
+
+```bash
+unzip suno-song-creator.zip -d ~/.gemini/skills/
+```
+
+**ChatGPT (Skills, beta):** the Skills feature is currently in beta and may
+require admin enablement on Enterprise / Edu workspaces. Once enabled, attach
+the unzipped skill directory through the workspace agent UI. Consumer-tier
+availability is rolling out — check OpenAI's
+[Skills in ChatGPT](https://help.openai.com/en/articles/20001066-skills-in-chatgpt)
+help article for current status.
+
+**Cowork:** rename the file from `.zip` to `.skill` and attach it in a Cowork
+session — Claude will offer to install it.
 
 ```bash
 mv suno-song-creator.zip suno-song-creator.skill
 ```
+
+After installing, restart your agent so the skill loader picks it up. The
+skill auto-triggers when you mention songwriting, lyrics, Suno, or related
+terms — no explicit invocation needed (assuming your agent supports auto-
+triggered skills; Cowork and Claude Code do).
 
 ### From source (for contributors or to track updates)
 
@@ -73,11 +101,42 @@ mv suno-song-creator.zip suno-song-creator.skill
 git clone https://github.com/jayweiler/suno-song-creator.git ~/.claude/skills/suno-song-creator
 ```
 
-The skill registers by being present in `~/.claude/skills/`. Restart Claude Code to pick it up.
+(Adjust the destination path for your agent — `~/.gemini/skills/`, `.codex/skills/`,
+etc.)
+
+## Compatibility
+
+| Agent | Status | Notes |
+|---|---|---|
+| Claude Code | ✅ Tested | Primary development target |
+| Cowork | ✅ Tested | Use the `.skill` rename trick above |
+| Claude Agent SDK | ✅ Should work | Same skills directory as Claude Code |
+| Codex CLI | ⚠️ Untested | Format is compatible; report issues |
+| Gemini CLI | ⚠️ Untested | Format is compatible; report issues |
+| ChatGPT Skills | ⚠️ Beta + untested | Skills are beta on ChatGPT; some features below may not work |
+| Cursor / Copilot / Windsurf | ⚠️ Untested | Read SKILL.md but may not auto-trigger |
+
+**Features that are platform-specific:**
+
+- **Persistent personal data** (the `<backup>/user-profile.md` and friends
+  pattern) needs the agent runtime to support reading and writing files
+  between sessions. Works natively on Claude Code, Cowork, Codex CLI, and
+  Gemini CLI. ChatGPT Skills' filesystem semantics are still settling — your
+  mileage may vary on whether `Default Suno model` and song catalog updates
+  persist across sessions. If you hit issues, the skill still works for
+  in-session songwriting; you just lose the cross-session memory.
+- **Suno catalog sync** uses the Claude-in-Chrome extension to scrape
+  `suno.com/@<handle>`. On other agents you'd need an equivalent
+  browser-automation capability (OpenAI's browser tools, Playwright MCP,
+  etc.) — or skip the sync and let the catalog build up organically as you
+  log new songs.
+
+If you get the skill working on a different agent and want to share notes,
+PRs to this README's Compatibility table are welcome.
 
 ## First run
 
-The first time you load the skill, Claude will:
+The first time you load the skill, the assistant will:
 
 1. **Resolve a backup directory** for your personal data. Personal files (profile,
    library, notebook, touchstones, catalog JSON) live outside the skill install so
@@ -88,7 +147,7 @@ The first time you load the skill, Claude will:
    - `references/.backup-path` — a one-line text file inside the install with an
      absolute path. Gets wiped on reinstall, so it's a fallback only.
 
-   If neither resolves, Claude asks you where to put the data:
+   If neither resolves, the assistant asks you where to put the data:
    - **A**: `~/.suno-song-creator-data/` (default)
    - **B**: a custom path you provide
    - **C**: skip — work from templates only, nothing persists this session
@@ -96,8 +155,8 @@ The first time you load the skill, Claude will:
 2. **Seed the four template files** at the backup location.
 
 3. **Ask whether you already have a Suno catalog to import.** If you've been on
-   Suno for a while, this is the moment to drop your `@handle` and let Claude
-   pull your back catalog so it knows your existing work. Options:
+   Suno for a while, this is the moment to drop your `@handle` so the assistant
+   can pull your back catalog and know your existing work. Options:
    - Pull public catalog only.
    - Pull public catalog plus playlists (also captures unpublished songs you've
      shared with people directly; requires you to be signed in to Suno in your
@@ -105,8 +164,8 @@ The first time you load the skill, Claude will:
    - Skip — you're starting fresh.
    - Skip for now and ask again next session.
 
-   If you choose to import, the pull happens through the Chrome extension and
-   takes ~1–2 minutes.
+   If you choose to import, the pull happens through Claude-in-Chrome (or your
+   agent's browser-automation equivalent) and takes ~1–2 minutes.
 
 4. **Ask which Suno model you usually use.** Options:
    - v5.5 (current latest, polished output, voice cloning, custom models)
@@ -118,7 +177,7 @@ The first time you load the skill, Claude will:
    per-model prompting guide to load when shaping style prompts and lyrics.
    You can override per song at any time ("use v5 for this one").
 
-After that, Claude drops into the songwriting jam.
+After that, the assistant drops into the songwriting jam.
 
 ## Recommended setup
 
@@ -166,18 +225,19 @@ different prompt style:
 
 When the skill is about to draft a style prompt, it loads
 `references/models/<your-default>.md` — the matching per-model guide tells
-Claude the format the model rewards, character limit, cue reliability, and any
-model-only features. Per-song overrides ("use v4.5 for this one") swap in a
-different file just for that song without changing your default.
+the assistant the format the model rewards, character limit, cue reliability,
+and any model-only features. Per-song overrides ("use v4.5 for this one") swap
+in a different file just for that song without changing your default.
 
 The full picker matrix is in `references/models/README.md`.
 
 ## Refreshing your Suno catalog
 
-Once your handle is on file, Claude offers a refresh check at the start of any
-session where the catalog is older than ~2 weeks (or where you mention a song or
-playlist it doesn't recognize). The refresh uses the Chrome extension to scrape
-your public profile and, optionally, your playlists.
+Once your handle is on file, the assistant offers a refresh check at the start
+of any session where the catalog is older than ~2 weeks (or where you mention a
+song or playlist it doesn't recognize). The refresh uses Claude-in-Chrome (or
+your agent's browser-automation equivalent) to scrape your public profile and,
+optionally, your playlists.
 
 Files written:
 
