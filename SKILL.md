@@ -107,8 +107,16 @@ Performance directions go in parentheses: `(whisper)`, `(spoken)`, `(building in
 
 #### 2. Suno Style Prompt
 
-Craft a style prompt that translates the song's feel into Suno's language. Read
-`references/suno-prompting-guide.md` for current best practices before writing the prompt.
+Craft a style prompt that translates the song's feel into Suno's language. **Always
+load two files before writing the prompt:**
+
+1. `references/models/<model>.md` — the per-model guide for the song's target Suno
+   model (resolved via the Model Selection flow below). Tells you the prompt format
+   that model rewards (narrative vs. comma-tag), its character limit, cue
+   reliability, and any model-only features that affect the prompt.
+2. `references/suno-prompting-guide.md` — cross-version songwriting craft, shared
+   vocabulary tables (genre / vocal / instrument / production), pitfalls, and
+   prompt templates by genre.
 
 A good style prompt includes:
 - Genre/subgenre blend (be specific: "melancholic indie-folk" not just "folk")
@@ -119,7 +127,14 @@ A good style prompt includes:
 - Mix/production notes when they matter ("dry, intimate, plenty of negative space")
 
 Do NOT reference artist names or song titles in the style prompt — Suno works best with
-descriptive language about sound, not name-drops.
+descriptive language about sound, not name-drops. Per the v5.5 guide, this also matters
+for provenance: the long generation prompt is preserved as permanent song metadata.
+
+When shaping the prompt, **conform to the format the target model rewards.** Write
+narrative prose for v5/v5.5 ("Warm upright bass enters in verse two and holds long
+tones from there"). Lead with comma-tag for v4.5 ("indie-folk, fingerpicked, warm
+upright bass, ~92 BPM"). Mixing the two against the wrong model produces flatter
+results.
 
 #### 3. Arrangement Notes
 
@@ -247,6 +262,69 @@ For C: write `none` (or a similar marker) into the handle field so future sessio
 don't re-ask. Skip the import.
 
 For D: leave the handle field blank. The freshness check will re-prompt next session.
+
+### Default Suno Model
+
+Suno has multiple active models with meaningfully different prompt formats, cue
+reliability, and feature sets. The skill keeps a default Suno model in the user
+profile under `## Identity > Default Suno model`, and loads the matching file
+from `references/models/<model>.md` whenever it's about to write a style prompt
+or shape lyrics. Per-song overrides are honored at any point in conversation.
+
+#### What the per-model files cover
+
+`references/models/README.md` is the picker matrix and decision rubric. Each
+per-model file (`v4-5.md`, `v5.md`, `v5-5.md`) contains: prompt format the model
+rewards (narrative vs. comma-tag), character limit, cue reliability, model-only
+features, and when to choose vs. when to switch.
+
+#### First-run prompt for the default model
+
+After the existing-catalog import, ask once for the user's default Suno model:
+
+> "Last setup question: which Suno model do you usually generate with? The skill
+> will tune style prompts and lyrics to whatever you pick — they have meaningfully
+> different prompt formats and cue reliability.
+>
+> **A**: v5.5 (current latest, March 2026 — best polish, voice cloning, custom
+> models. Default recommendation.)
+> **B**: v5 (Sept 2025 — best for raw / lo-fi / austere aesthetics that v5.5
+> over-polishes. Still actively used.)
+> **C**: v4.5 / v4.5+ (May–July 2025 — predictable comma-tag prompts, Pro-only
+> Add Vocals / Add Instrumentals workflows.)
+> **D**: I'll decide per song — don't set a default."
+>
+For A/B/C, write the model identifier (`v5.5`, `v5`, `v4.5`, etc.) into
+`<backup>/user-profile.md` under `## Identity > Default Suno model`.
+
+For D, leave the field blank. The skill will ask at the start of any session
+where it's about to draft a style prompt unless a default is set.
+
+#### Returning-session behavior
+
+On every session start (after reading the user profile), check the
+`Default Suno model` field:
+
+- If set, load `references/models/<model>.md` into context. Use it as the basis
+  for all prompt-shaping in the session.
+- If blank, work from the cross-version `suno-prompting-guide.md` only and ask
+  the user before drafting the first style prompt: "What model should I tune
+  this for?" Persist their answer to the profile if they want a default.
+
+#### Per-song override
+
+The user can override the default mid-session at any time: "use v5 for this
+one," "let's do this in v4.5," etc. When this happens, swap in the override
+model's file for the current song's prompt shaping. Do NOT change the profile
+default — the override is per-song. Note the model used in the song's entry in
+the `Songs Created` table when logging.
+
+#### When the user asks for guidance
+
+If the user asks "which should I use for this song?", answer using the picker
+rubric in `references/models/README.md`. Don't push polish-by-default — for
+raw / austere / lo-fi songs, recommend v5 over v5.5 even though v5.5 is the
+default.
 
 ### Reading and Writing Personal Data
 
@@ -539,10 +617,20 @@ Make the listener feel seen, not observed.
 
 ## Reference Files
 
-- `references/suno-prompting-guide.md` — Suno platform technical knowledge: prompting best
-  practices, version-specific features, formatting rules, and platform tips. **Read this before
-  writing any Suno style prompt.** This file should be updated as Suno releases new versions or
-  as new best practices emerge.
+- `references/suno-prompting-guide.md` — Cross-version songwriting craft, shared
+  vocabulary tables (genre / vocal / instrument / production), lyrics formatting,
+  pitfalls, and prompt templates by genre. Apply to every Suno style prompt
+  regardless of model.
+
+- `references/models/` — Per-model prompting guides. Load the file matching the
+  user's `Default Suno model` before writing any style prompt or lyrics; that
+  file tells you the prompt format the model rewards (narrative vs. comma-tag),
+  character limit, cue reliability, and model-only features.
+  - `references/models/README.md` — picker matrix and decision rubric
+  - `references/models/v4-5.md` — v4.5, v4.5+, v4.5-All
+  - `references/models/v5.md` — v5
+  - `references/models/v5-5.md` — v5.5
+  When Suno releases a new model, add a new file here and update the picker.
 
 - `references/user-profile-template.md` — Template for storing user preferences and creative
   tendencies. Used to personalize sessions over time.

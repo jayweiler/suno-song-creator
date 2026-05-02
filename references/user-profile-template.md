@@ -8,6 +8,7 @@
 
 - **Name:**
 - **Suno handle:** (the `@handle` portion of `suno.com/@<handle>` — used to pull your published catalog)
+- **Default Suno model:** (e.g., `v5.5`, `v5`, `v4.5`. Skill loads the matching `references/models/<model>.md` when shaping prompts. Per-song overrides honored in conversation.)
 - **Relationship to music:** (hobbyist, semi-pro, using for therapy/expression, etc.)
 
 ## Style DNA

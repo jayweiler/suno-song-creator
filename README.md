@@ -31,6 +31,11 @@ you can swap in. The session is meant to feel like a jam, not an interview.
   published catalog (and optionally your playlists, including unpublished songs)
   via the Chrome extension, so future sessions know what you've already written
   and don't re-suggest territory you've covered.
+- **Per-model prompt tuning.** Suno's models behave differently — v4.5 rewards
+  comma-tag prompts; v5 and v5.5 reward narrative prose; v5.5 polishes
+  aesthetics that v5 keeps raw. Pick a default model in your profile and the
+  skill loads the matching guide before drafting any style prompt or lyrics.
+  Override per-song whenever you want.
 
 ## Install
 
@@ -91,6 +96,16 @@ The first time you load the skill, Claude will:
    If you choose to import, the pull happens through the Chrome extension and
    takes ~1–2 minutes.
 
+4. **Ask which Suno model you usually use.** Options:
+   - v5.5 (current latest, polished output, voice cloning, custom models)
+   - v5 (best for raw / lo-fi / austere aesthetics that v5.5 over-polishes)
+   - v4.5 / v4.5+ (predictable comma-tag prompts, Pro-only Add Vocals workflow)
+   - Skip — decide per song
+
+   Whatever you pick gets stored in your profile and tells the skill which
+   per-model prompting guide to load when shaping style prompts and lyrics.
+   You can override per song at any time ("use v5 for this one").
+
 After that, Claude drops into the songwriting jam.
 
 ## Recommended setup
@@ -116,10 +131,34 @@ Just talk. Say things like:
   line undercuts the first."
 - "Got any open seeds I should work on?"
 - "Refresh my Suno catalog — I published a few new ones this week."
+- "Switch my default to v5 — I want rawer output going forward."
+- "Use v5 for this one — it's meant to sound austere."
 
 The skill triggers on a wide range of music-making language ("song," "lyrics,"
 "track," "Suno," "verse," "chorus," etc.) and on emotional/experiential framings
 that imply musical output. You don't need to invoke it explicitly.
+
+## Picking a Suno model
+
+The skill keeps a default model in your profile. Each Suno model rewards a
+different prompt style:
+
+- **v5.5** (Mar 2026, latest) — narrative prose works best; polished, stem-friendly
+  output; Voices, Custom Models, My Taste, Replace Section.
+- **v5** (Sept 2025) — narrative prose works; preserves raw / austere texture
+  better than v5.5; pick this for lo-fi, dark ambient, raw black metal, austere
+  folk, or anything where over-polish is a regression.
+- **v4.5 / v4.5+** (May–Jul 2025) — comma-tag prompts work most reliably; cue
+  control is less consistent than v5+; v4.5+ has Pro-only Add Vocals and Add
+  Instrumentals workflows.
+
+When the skill is about to draft a style prompt, it loads
+`references/models/<your-default>.md` — the matching per-model guide tells
+Claude the format the model rewards, character limit, cue reliability, and any
+model-only features. Per-song overrides ("use v4.5 for this one") swap in a
+different file just for that song without changing your default.
+
+The full picker matrix is in `references/models/README.md`.
 
 ## Refreshing your Suno catalog
 
@@ -149,9 +188,15 @@ explicitly ask.
 suno-song-creator/
 ├── SKILL.md                                  # the skill itself
 ├── README.md                                 # this file
+├── LICENSE                                   # MIT
 ├── .gitignore                                # excludes personal data + dev cruft
 └── references/
-    ├── suno-prompting-guide.md               # Suno platform best practices
+    ├── suno-prompting-guide.md               # cross-version songwriting craft
+    ├── models/
+    │   ├── README.md                         # picker matrix + decision rubric
+    │   ├── v4-5.md                           # v4.5, v4.5+, v4.5-All
+    │   ├── v5.md                             # v5
+    │   └── v5-5.md                           # v5.5
     ├── user-profile-template.md              # seeded → <backup>/user-profile.md
     ├── inspiration-library-template.md       # seeded → <backup>/inspiration-library.md
     ├── notebook-template.md                  # seeded → <backup>/notebook.md
@@ -162,13 +207,23 @@ Personal data files are deliberately *not* in the repo. They live at
 `$SUNO_SKILL_BACKUP_DIR` (or whatever path you picked at first run) and the
 skill reads/writes them directly.
 
-## Updating the Suno prompting guide
+## Updating the prompting guides
 
-`references/suno-prompting-guide.md` documents Suno's prompting best practices,
-version-specific features, and formatting rules. Suno releases new versions
-fairly often; if you notice the guide is out of date, update it directly and
-open a PR — the skill reads it before writing any style prompt, so keeping it
-current matters.
+There are two layers to keep current:
+
+- `references/suno-prompting-guide.md` — cross-version craft and shared
+  vocabulary (genre / vocal / instrument / production tables, lyrics
+  formatting, pitfalls, prompt templates by genre). Update when Suno-wide
+  best practices shift.
+- `references/models/<model>.md` — per-model guides (prompt format, cue
+  reliability, character limits, model-only features). When Suno releases a
+  new model, drop a new file here and update `references/models/README.md`
+  (picker matrix + decision rubric).
+
+Suno ships new versions and feature updates regularly; if you notice the
+guides drifting from reality, edit them directly and open a PR. The skill
+reads both layers before writing any style prompt, so keeping them current
+matters.
 
 ## Contributing
 
