@@ -219,6 +219,35 @@ After seeding, tell the user: "I've seeded fresh personal-data files at [PATH]. 
 work together, I'll build them up with your style preferences, recurring themes, song
 catalog, library entries, notebook seeds, and touchstones."
 
+### First-Run Existing-Catalog Import
+
+Immediately after seeding (and only on a true first run, where `user-profile.md` was
+just created from the template), ask once whether the user already has a Suno catalog
+to import. Most people who reach for this skill have been on Suno for a while; assuming
+they're starting from zero is the wrong default.
+
+> "Quick one before we start writing: do you already have songs on Suno? If yes, share
+> your handle (the `@whatever` from `suno.com/@whatever`) and I can pull your back
+> catalog so future sessions know your existing work and don't suggest things you've
+> already written.
+>
+> **A**: Yes — here's my handle: `@<handle>`. Pull public catalog only.
+> **B**: Yes — here's my handle: `@<handle>`. Pull public catalog *and* playlists
+> (also captures unpublished songs you've shared with people directly; requires you
+> to be signed in to Suno in the browser).
+> **C**: No, I'm starting fresh — skip this.
+> **D**: Skip for now, ask me again next session."
+>
+For A or B: write the handle into `user-profile.md` under `## Identity > Suno handle`,
+then run the same pull flow described in the Session-Start Catalog & Playlist Freshness
+Check below (steps 4–7). Summarize what came back before continuing to the songwriting
+jam.
+
+For C: write `none` (or a similar marker) into the handle field so future sessions
+don't re-ask. Skip the import.
+
+For D: leave the handle field blank. The freshness check will re-prompt next session.
+
 ### Reading and Writing Personal Data
 
 All personal-data reads and writes use `<backup>/<filename>` directly. Never copy
@@ -248,12 +277,25 @@ preferences: "Want me to remember your style preferences for next time?"
 
 ### Session-Start Catalog & Playlist Freshness Check
 
-If the profile contains a **Suno handle** and a list of known published songs and playlists,
-treat both as potentially stale. Before writing anything new:
+If the profile contains a **Suno handle**, treat any associated catalog/playlist data as
+potentially stale or absent. This check fires in two cases:
 
-1. Note the date the catalog was last synced (stated at the top of `user-profile.md`).
-2. If it's been more than ~2 weeks, or if the user references a song or playlist you don't
-   recognize from the profile, **ask once** at the start of the session:
+- **No catalog file exists yet** for this handle (e.g., the user added a handle but
+  hasn't done a pull). Treat this as a fresh-import opportunity and offer the same
+  A/B/C menu below — there's nothing local to compare against, so the "what's new"
+  step in (6) is just "everything we pulled."
+- **A catalog file exists** but is older than ~2 weeks, or the user references a song
+  or playlist you don't recognize from the profile.
+
+If the handle field is explicitly set to `none` (or similar marker), skip the check —
+the user has told you they don't have a Suno catalog to sync.
+
+Before writing anything new:
+
+1. Note the date the catalog was last synced (stated at the top of `user-profile.md`),
+   or note that no sync has happened yet if the catalog file is absent.
+2. If a refresh is warranted per the rules above, **ask once** at the start of the
+   session:
 
    > "Your Suno catalog was last synced on [DATE]. Want me to refresh from your account before
    > we start? Takes ~1–2 minutes via the Chrome extension. Two checks:

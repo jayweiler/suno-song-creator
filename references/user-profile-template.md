@@ -7,6 +7,7 @@
 ## Identity
 
 - **Name:**
+- **Suno handle:** (the `@handle` portion of `suno.com/@<handle>` — used to pull your published catalog)
 - **Relationship to music:** (hobbyist, semi-pro, using for therapy/expression, etc.)
 
 ## Style DNA
