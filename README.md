@@ -42,26 +42,38 @@ you can swap in. The session is meant to feel like a jam, not an interview.
 This skill follows the standard Claude skill layout — a directory with a `SKILL.md`
 at the root.
 
-### Claude Code / Claude Agent SDK
+### Quick install (recommended)
 
-Clone or symlink into your skills directory:
+Download the latest release zip:
 
-```bash
-git clone git@github.com:jayweiler/suno-song-creator.git ~/.claude/skills/suno-song-creator
-```
+[**suno-song-creator.zip**](https://github.com/jayweiler/suno-song-creator/releases/latest/download/suno-song-creator.zip)
 
-The skill registers itself by being present. Restart Claude Code (or your agent)
-so the skill loader picks it up.
+Then, depending on where you run Claude:
 
-### Cowork
-
-Build a `.skill` bundle and install it via the Cowork app:
+**Claude Code / Claude Agent SDK:**
 
 ```bash
-cd /path/to/parent && zip -r suno-song-creator.skill suno-song-creator/
+unzip suno-song-creator.zip -d ~/.claude/skills/
 ```
 
-Then attach the `.skill` file in a Cowork session — Claude will offer to install it.
+Restart Claude Code (or your agent) so the skill loader picks it up.
+
+**Cowork:**
+
+Rename the file from `.zip` to `.skill`, then attach it in a Cowork session —
+Claude will offer to install it.
+
+```bash
+mv suno-song-creator.zip suno-song-creator.skill
+```
+
+### From source (for contributors or to track updates)
+
+```bash
+git clone https://github.com/jayweiler/suno-song-creator.git ~/.claude/skills/suno-song-creator
+```
+
+The skill registers by being present in `~/.claude/skills/`. Restart Claude Code to pick it up.
 
 ## First run
 
