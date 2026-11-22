@@ -1,23 +1,29 @@
-# Suno Prompting Guide — Cross-Version
+# Suno Prompting Guide: Cross-Version
 
-> **Last updated:** 2026-05-01 | **Covers:** Suno v4.5, v5, v5.5
+> **Last updated:** 2026-11-21 | **Covers:** the v6 family (current) and the retired
+> v4.5, v5 and v5.5
 >
 > This file holds the songwriting craft and shared vocabulary that applies
-> across modern Suno models. **For model-specific behavior — prompt format
+> across modern Suno models. **For model-specific behavior, prompt format
 > (narrative vs. comma-tag), cue reliability, character limits, model-only
-> features — load the appropriate file from `references/models/`** before
+> features, load the appropriate file from `references/models/`** before
 > writing the style prompt and lyrics:
 >
-> - `references/models/README.md` — picker matrix and decision rubric
-> - `references/models/v4-5.md` — Suno v4.5 / v4.5+ / v4.5-All
-> - `references/models/v5.md` — Suno v5
-> - `references/models/v5-5.md` — Suno v5.5
+> - `references/models/README.md`: picker matrix and decision rubric
+> - `references/models/v6.md`: Suno v6 / v6-wild / v6-mini (current)
+> - `references/models/v4-5.md`: Suno v4.5 / v4.5+ / v4.5-All
+> - `references/models/v5.md`: Suno v5
+> - `references/models/v5-5.md`: Suno v5.5
+>
+> The v4.5, v5 and v5.5 notes in this file are kept for reading old prompts. Those models
+> were retired on September 9, 2026. Where this file says "v5/v5.5", the same narrative
+> approach applies to v6 unless `models/v6.md` says otherwise.
 
 ## Table of Contents
 
 1. [Lyrics Formatting](#lyrics-formatting)
 2. [Section Tags Reference](#section-tags-reference)
-3. [Bracketed vs. Parenthetical Cues — Mechanics](#bracketed-vs-parenthetical-cues--mechanics)
+3. [Bracketed vs. Parenthetical Cues: Mechanics](#bracketed-vs-parenthetical-cues-mechanics)
 4. [Performance Direction Vocabulary](#performance-direction-vocabulary)
 5. [Genre & Style Descriptors](#genre--style-descriptors)
 6. [Vocal Descriptors](#vocal-descriptors)
@@ -48,7 +54,7 @@ Second line of chorus
 ### Line breaks
 
 Use line breaks to indicate phrasing. Suno interprets line breaks as
-breath/pause points. Keep lines roughly singable — not too long, not fragmented
+breath/pause points. Keep lines roughly singable, not too long, not fragmented
 into single words (unless that's a deliberate effect).
 
 ### Syllable count
@@ -58,14 +64,15 @@ the syllable count and stress pattern similar to the original.
 
 ### Lyrics length
 
-Keep total lyrics under ~3000 characters for best results across all current
-models. If longer, consider splitting into parts.
+Suno caps lyrics at 5000 characters. Shorter usually sings better: aim for
+well under 3000 unless the song needs more. Lyrics that are too long for the
+song's length get rushed or dropped.
 
 ---
 
 ## Section Tags Reference
 
-Standard tags Suno recognizes (work across v4.5, v5, v5.5):
+Standard tags Suno recognizes (v4.5 through v6):
 
 | Tag | Use |
 |-----|-----|
@@ -81,27 +88,27 @@ Standard tags Suno recognizes (work across v4.5, v5, v5.5):
 | `[Outro]` | Closing section |
 | `[Tag]` | Short repeated phrase at the very end |
 | `[Refrain]` | Recurring line or couplet |
-| `[Final Chorus]` | Last chorus (signals build/climax — drop if you want flat dynamics) |
+| `[Final Chorus]` | Last chorus (signals build/climax, drop if you want flat dynamics) |
 | `[Instrumental]` | Pure instrumental section |
 
 You can combine descriptors: `[Chorus] (repeat, fuller instrumentation)` or
 `[Outro] (soft but defiant)`.
 
-**Reliability of tags varies by model — see the per-model files.** Older models
+**Reliability of tags varies by model, see the per-model files.** Older models
 (v4.5) honor tags in their immediate section but often drop instructions on
 later callbacks. v5+ holds tags across the song.
 
 ---
 
-## Bracketed vs. Parenthetical Cues — Mechanics
+## Bracketed vs. Parenthetical Cues: Mechanics
 
 These are two distinct mechanisms that often get conflated. Both work on
 modern Suno (v4.5+), with reliability increasing in v5 and v5.5.
 
 - **Bracketed `[Whispered Verse]`, `[Spoken Word]`, `[Spoken Bridge]`,
-  `[Haunting Whispered Pre-Chorus]`** — section-level. Apply to the *entire*
+  `[Haunting Whispered Pre-Chorus]`**: section-level. Apply to the *entire*
   tagged section. Replace or augment standard `[Verse]` / `[Bridge]` etc.
-- **Parenthetical `(spoken)`, `(whispered)`, `(belted)`** — inline / line-level.
+- **Parenthetical `(spoken)`, `(whispered)`, `(belted)`**: inline / line-level.
   Sit inside a section. Apply to the moment they appear (typically the line
   that follows).
 
@@ -158,22 +165,22 @@ specific cues are more or less reliable on each model.
 
 ### What does NOT work reliably (avoid across models)
 
-- **Compound cues mixing documented vocab with custom modifiers** —
+- **Compound cues mixing documented vocab with custom modifiers**:
   `(spoken, alone)` ❌. "alone" isn't a documented vocal direction. If you need
   spoken delivery AND isolation, use `(spoken)` and create the isolation
   structurally (blank line above, brief stanza).
-- **Long stage-direction prose** — `(piano builds, voice cracks then soars)` ⚠️.
+- **Long stage-direction prose**: `(piano builds, voice cracks then soars)` ⚠️.
   Inconsistently honored. Break into shorter cues OR move arrangement direction
   to the Style prompt.
-- **Arrangement descriptions in lyric parentheticals** —
+- **Arrangement descriptions in lyric parentheticals**:
   `(fingerpicked acoustic, alone)` ❌. Arrangement belongs in the Style prompt.
-- **Custom emotional descriptors** — `(with growing despair)`, `(seething)`,
+- **Custom emotional descriptors**: `(with growing despair)`, `(seething)`,
   `(brokenly)` ⚠️. Stick to documented terms; let lyrics carry emotion.
-- **Stacking multiple cues per section** — `(whispered) (slow) (intimate)` ⚠️.
+- **Stacking multiple cues per section**: `(whispered) (slow) (intimate)` ⚠️.
   Confuses the model. One cue, the one that matters most.
-- **Stage-script formatting** — `[narrator: "..."]` or `(she enters)` ❌. Suno
+- **Stage-script formatting**: `[narrator: "..."]` or `(she enters)` ❌. Suno
   isn't a screenplay parser.
-- **Empty/silent cues** — `(silence)`, `(pause)`, `(break)` ❌. Use `[Break]`
+- **Empty/silent cues**: `(silence)`, `(pause)`, `(break)` ❌. Use `[Break]`
   for an instrumental pause, or just leave a blank line.
 
 ### Combining safely
@@ -184,7 +191,7 @@ specific cues are more or less reliable on each model.
   modifies.
 - Bracketed section-level + inline parenthetical CAN combine
   (`[Whispered Verse]` for the whole verse + `(belted)` on one line inside it
-  for contrast) but test carefully — competing instructions sometimes cancel.
+  for contrast) but test carefully, competing instructions sometimes cancel.
 
 ### Failure modes to expect even when cues are documented
 
@@ -192,7 +199,7 @@ specific cues are more or less reliable on each model.
   an "anthem" Style prompt overriding a `(whispered)` cue).
 - First generation may not honor a cue; second often does. Re-roll once before
   assuming the cue is broken.
-- A cue that lands once may not land identically on regeneration — Suno is
+- A cue that lands once may not land identically on regeneration, Suno is
   stochastic.
 
 ---
@@ -219,7 +226,7 @@ resigned indie-folk"
 **Era references:** "90s alternative," "80s new-wave," "60s surf," "mid-2000s
 bloghouse"
 
-Stacking 2–3 mood adjectives before the genre helps Suno locate the specific
+Stacking 2 to 3 mood adjectives before the genre helps Suno locate the specific
 subgenre intended.
 
 ---
@@ -281,8 +288,9 @@ end, lo-fi processing
    (the long generation prompt is preserved as provenance and is NOT editable
    after generation).
 
-4. **Wrong prompt format for the model.** v4.5 still rewards comma-tag lists;
-   v5 and v5.5 reward narrative prose that describes how the music unfolds.
+4. **Wrong prompt format for the model.** The v6 family, like v5 and v5.5,
+   rewards narrative prose that describes how the music unfolds. v4.5
+   (retired) rewarded comma-tag lists.
    Using comma-tag style on v5/v5.5 produces flatter results; using heavy
    narrative prose on v4.5 produces under-honored direction. Check the per-model
    file before drafting the style prompt.
@@ -294,27 +302,34 @@ end, lo-fi processing
    (reverb, harmonies, build on final chorus) even when you ask for
    dry/restrained. Explicitly state anti-build directives and be prepared to
    iterate. See [Restraint Prompting Patterns](#restraint-prompting-patterns).
-   Note: v5 preserves more raw texture than v5.5 for songs that should sound
-   austere — for raw/lo-fi/dark/austere aesthetics, prefer v5 over v5.5.
+   On v6, polish is the default: ask for imperfection in words (cracked
+   vocal, tape hiss, loose timing) and consider v6-wild for texture. (v5 was
+   the old answer for raw aesthetics; it is retired.)
 
-7. **Too many negatives:** Cap at 2–3. Consolidate overlapping ones. "No
+7. **Too many negatives:** On v6, put rejections in Exclude Styles (or
+   `negative_style` through a connector) instead of the style prose, where
+   naming an unwanted element can summon it. In the prose, cap at 2 to 3. Consolidate overlapping ones. "No
    crescendo, no cymbal wash, no triumphant lift, no key change, no build" is
-   the same directive five ways — use `"no build anywhere"` to cover them all.
+   the same directive five ways, use `"no build anywhere"` to cover them all.
 
-8. **Lyrics too long:** Keep total under ~3000 characters for best results
-   across all current models.
+8. **Lyrics too long:** The cap is 5000 characters, but long lyrics get
+   rushed. Shorter sings better.
 
 9. **Parenthetical overreach in lyrics:** Keep parentheticals to short vocal
    cues. `(fingerpicked acoustic, alone)` is an arrangement description that
    belongs in the Style prompt, not the Lyrics field.
 
 10. **Expecting key signature enforcement:** BPM is honored reliably across v5
-    and v5.5. Key signature is not — the generative model doesn't strongly
+    and v5.5. Key signature is not, the generative model doesn't strongly
     condition on key. Plan accordingly.
 
-11. **Forgetting tokenizer front-loading:** the first ~3 words of the style
+11. **Leaving Variety on with an engineered prompt (v6):** above Off, Suno
+    rewrites the style text before generating. Set Variety to Off when the
+    wording matters.
+
+12. **Forgetting tokenizer front-loading:** the first ~3 words of the style
     field carry more weight than the last ten. Order: genre/subgenre → vocal
-    direction → key mood → 1–2 priority instruments → BPM → production notes
+    direction → key mood → 1 to 2 priority instruments → BPM → production notes
     → dynamic directives → negatives.
 
 ---
@@ -324,8 +339,9 @@ end, lo-fi processing
 Modern Suno (v5/v5.5) defaults to adding gloss and building to a satisfying
 payoff on the final chorus. For songs that need to stay quiet or resigned
 (intimate indie-folk, hymnal, muted ballads), you must actively fight this.
-v5.5 leans harder into polish than v5; if the song should sound raw or austere,
-also consider switching to v5.
+v6 polishes by default too. If the song should sound raw or austere, say so in
+the prompt, list the gloss you do not want in Exclude Styles, and consider
+v6-wild.
 
 ### What works:
 
@@ -334,7 +350,7 @@ also consider switching to v5.
 - **Consolidated anti-build negative:** "No build anywhere."
 - **Cut specific default-to-polish instruments:** "No drums. No banjo." Banjo
   rolls and drum kits both push toward poppy on fingerpicked folk. If you want
-  the muted register, cut them explicitly — Suno reaches for them by default.
+  the muted register, cut them explicitly, Suno reaches for them by default.
 - **Dry production directive:** "Dry production, no reverb on the vocal, plenty
   of silence between phrases."
 - **Instrument narrative arc:** describe when instruments enter, not just that
@@ -347,7 +363,7 @@ also consider switching to v5.
 ### Escalation pattern
 
 If the first generation still lifts:
-1. Add "absolutely no dynamic change anywhere in the song — the final bar is
+1. Add "absolutely no dynamic change anywhere in the song, the final bar is
    at the same volume as the first bar" as its own sentence.
 2. Remove any instruments from the prompt that Suno is foregrounding
    inappropriately.
@@ -357,9 +373,9 @@ If the first generation still lifts:
 
 ## Prompt Templates by Genre
 
-These templates are written in v5/v5.5-friendly narrative prose. For v4.5,
-either translate to comma-tag style or keep the prose short with strong
-keyword anchors at the front.
+These templates are written as narrative prose, the format v5, v5.5 and the
+v6 family reward. On v6, move the "No ..." lines into Exclude Styles and set
+Variety to Off.
 
 ### Intimate Indie-Folk (restrained/muted)
 > Muted, resigned indie-folk ballad with a hymnal quality. The vocal is an
@@ -417,22 +433,26 @@ keyword anchors at the front.
 ### Neoclassical Ambient (for found-text pieces)
 > A delicate neoclassical ambient piece with felt piano, soft string swells,
 > and light electronic textures. Sparse and emotional, with slow evolving
-> chords and a warm, intimate sound. Gentle, cinematic, and introspective —
-> like a quiet Icelandic cabin. Evokes nostalgia, stillness, and quiet hope.
+> chords and a warm, intimate sound. Gentle, cinematic, and introspective:
+> like a quiet cabin in deep winter. Evokes nostalgia, stillness, and quiet hope.
 
 ---
 
 ## Changelog
 
+- **2026-11-21:** Updated for the v6 family (current since 2026-09-09; v4.5,
+  v5 and v5.5 retired). Lyrics cap corrected to 5000 characters. Pitfalls
+  updated for Exclude Styles, Variety and v6's default polish. Templates
+  noted as v6-compatible.
 - **2026-05-01:** Restructured to cross-version. Per-model behavior (prompt
   format, cue reliability, character limits, model-only features) moved to
-  `references/models/` — one file per model (v4-5.md, v5.md, v5-5.md) plus a
+  `references/models/`: one file per model (v4-5.md, v5.md, v5-5.md) plus a
   picker README. This file now holds shared songwriting craft, vocabulary
   tables, lyrics formatting mechanics, and prompt templates that apply across
   v4.5, v5, and v5.5. Added cross-version notes to Common Pitfalls and
   Restraint Prompting Patterns where behavior shifts between model families.
 - **2026-04-25 (later):** Added Comprehensive Cue & Tag Reference subsection
-  (now in `models/v5-5.md`) — full tables of documented working tags
+  (now in `models/v5-5.md`): full tables of documented working tags
   (section, bracketed performance modifiers, inline parenthetical cues across
   vocal/dynamic/mood categories) plus an explicit "what does NOT work" list
   plus failure-mode notes.

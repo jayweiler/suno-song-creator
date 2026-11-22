@@ -1,59 +1,87 @@
-# Suno Models — Picker & Per-Model Guides
+# Suno Models: Picker and Per-Model Guides
 
-This directory holds per-model prompting guidance. The skill loads the file matching
-the user's `Default Suno model` (from `<backup>/user-profile.md` → `## Identity`)
-before drafting the style prompt and lyrics. Per-song overrides are honored —
-e.g., the user saying "use v5 for this one."
+This directory holds per-model prompting guidance. The skill loads the file
+matching the user's `Default Suno model` (from `<backup>/user-profile.md`,
+under `## Identity`) before drafting a style prompt or lyrics. Per-song
+overrides are honored, for example "use v6-wild for this one."
 
-## Quick comparison
+Checked 2026-11-21 against Suno's v6 FAQ, "What's new in v6?" and release
+notes. No model newer than the v6 family is named there as of that date.
 
-| | v4.5 / v4.5+ | v5 | v5.5 |
+## Current family (since September 9, 2026)
+
+All earlier models were retired for new generations on that day. Old songs
+stay playable, shareable, remasterable and coverable.
+
+| | v6 | v6-wild | v6-mini |
 |---|---|---|---|
-| Released | May 2025 / Jul 2025 | Sept 2025 | Mar 2026 |
-| Style char limit | 1000 | 1000 | 1000 |
-| First-gen length | 8 min (v4.5+); 4 min + Extend on v4.5 | 8 min | 8 min |
-| Prompt format | Hybrid — comma-tags reliable, conversational works | Narrative / NLP-driven | Narrative / NLP-driven (best) |
-| Cue reliability | Usable; often dropped on later sections | Reliable across the song | Reliable; cues are an internal control system |
-| Audio profile | Polished, broad-appeal | Radio-ready; texture preserved (best for raw/lo-fi) | Softer, quieter, more headroom; stem-friendly |
-| Standout features | Add Vocals, Add Instrumentals, Spark from Playlist (v4.5+ Pro) | Studio mode | Voices, Custom Models, My Taste, Replace Section, Open in Studio |
+| Plan | Pro and Premier | Pro and Premier | All plans, including free |
+| Suno's description | Flagship. Reliable, precise, polished across genres | Less predictable and more varied, for exploration | Faster, lighter, for quick ideas |
+| Use it for | Finished songs, following a brief | Surprise, genre blends, genres v6 flattens, MIDI score input | Lyric and structure checks, drafts |
+| Max length | 8 minutes | 8 minutes | 8 minutes |
+| Prompt format | Narrative prose | Narrative prose | Narrative prose |
+
+With a Suno connector, the labels an account may actually send are in
+`allowed_models` from `account-usage`. Trust that list over this table.
 
 ## When to choose what
 
-**Pick v4.5 / v4.5+** when you want predictable comma-tag behavior, fast iteration,
-or you're using the Pro-only Add Vocals / Add Instrumentals workflow (start from
-just vocals or just an instrumental).
+**v6** for anything meant to be finished. It follows a brief closely and
+polishes by default, so ask for grit in words if the song needs it.
 
-**Pick v5** when you want the best output most of the time. It's the strongest
-default for songs that need narrative arrangement direction *and* preserve a raw,
-unpolished, or austere texture (lo-fi, dark ambient, raw black metal, austere
-folk). v5.5 over-polishes those aesthetics; v5 doesn't.
+**v6-wild** when the song wants surprise or lives in a genre where testers
+found v6 flat (heavy guitar, metal, drum and bass, per community reports).
+Expect to discard more takes. A good pattern is to sketch in wild, then cover
+the keeper in v6.
 
-**Pick v5.5** when you want polished, professional-sounding output, you're
-incorporating your own voice (Voices), you've trained a Custom Model, you want
-to surgically replace a single section (Replace Section), or you'll mix in a
-DAW after using the stem-friendly profile. Expect ~1.5–2 dB quieter masters
-than v5.
+**v6-mini** to check lyrics and structure cheaply before spending on v6, or
+when the account has no paid plan.
 
-If the user has no preference, default to **v5.5** for the strongest narrative
-prompt understanding and richest cue control — but suggest v5 explicitly if the
-song is meant to be raw / unpolished.
+If the user has no preference, default to **v6** on a paid plan and
+**v6-mini** otherwise.
+
+## Settings that matter as much as the model
+
+- **Variety.** Above Off, Suno rewrites the style text before generating. Set
+  it to Off (0) whenever the style prompt is engineered.
+- **Exclude Styles.** Put rejections here, not in the style prose.
+- **Max Mode.** More compute for more credits. Suno suggests it for songs over
+  two minutes, close covers, style transfer and consistent vocals. The user
+  decides; the skill never turns it on unasked.
+
+Details, sources and what is unverified: `v6.md`.
+
+## Retired models (reference only)
+
+Kept so the skill can read old prompts and catalog entries. They cannot be
+selected for new generations.
+
+| | v4.5 / v4.5+ | v5 | v5.5 |
+|---|---|---|---|
+| Released | May and July 2025 | September 2025 | March 2026 |
+| Prompt format | Comma-tags most reliable | Narrative prose | Narrative prose |
+| Known for | Predictable tag behavior | Raw, lo-fi, austere texture kept intact | Polish, more headroom, Voices, Custom Models |
+
+When reusing a prompt written for one of these, re-test it on v6. The v6
+family was trained on a different corpus, and a prompt tuned for v5.5 will not
+land the same way. For the raw aesthetics v5 handled well, write the grit into
+the v6 prompt and try v6-wild.
 
 ## How the skill uses this
 
-At session start, the skill reads `<backup>/user-profile.md` for the
-`Default Suno model:` field. If it's set, that model's file in this directory is
-loaded before drafting any style prompt or lyrics. If it's blank, the skill asks
-once, persists the answer, and continues.
+At session start the skill reads the `Default Suno model:` field in the
+profile. If it is set, that model's file here is loaded before any style
+prompt or lyrics. If it is blank, the skill asks once, saves the answer if the
+user wants a default, and continues.
 
-Per-song overrides are honored at any point in the session — saying "let's do
-this one in v5" causes the skill to swap in `v5.md` for that song's prompt
-shaping without changing the profile default.
+A per-song override swaps in a different file for that song only and does not
+change the profile default.
 
 ## Files
 
-- `v4-5.md` — covers v4.5, v4.5+, and v4.5-All
-- `v5.md` — covers v5
-- `v5-5.md` — covers v5.5
+- `v6.md`: v6, v6-wild, v6-mini (current)
+- `v5-5.md`: v5.5 (retired)
+- `v5.md`: v5 (retired)
+- `v4-5.md`: v4.5, v4.5+, v4.5-All (retired)
 
-When a new model ships, drop a new file in this directory and update the comparison
-table above plus the picker rubric.
+When a new model ships, add a file here and update the tables above.
