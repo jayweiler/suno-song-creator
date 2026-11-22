@@ -1,14 +1,19 @@
-# Personal data — never commit
-# (As of the read-from-backup design, personal files live in $SUNO_SKILL_BACKUP_DIR
-# and shouldn't appear in references/ at all. These entries are a safety net in case
-# legacy copies show up here during development or transition.)
+# Personal data: never commit.
+# Personal files live in $SUNO_SKILL_BACKUP_DIR and should not appear in
+# references/ at all. These entries are a safety net in case a copy shows up
+# here during development.
 references/user-profile.md
 references/inspiration-library.md
 references/notebook.md
 references/touchstones.md
+references/local-notes.md
 references/*_catalog.json
 references/*_playlists.json
 references/.backup-path
+
+# Build artifacts
+*.skill
+*.zip
 
 # macOS noise
 .DS_Store
